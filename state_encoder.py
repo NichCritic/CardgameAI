@@ -40,7 +40,7 @@ def encode_state(state: GameState, player_idx: int) -> np.ndarray:
             attack_cost_types[_energy_type_to_idx(e)] += 1.0
         features.extend(attack_cost_types)
     else:
-        features.extend([0.0] * 19)
+        features.extend([0.0] * 21)
     
     my_bench = obs["my_bench"]
     for i in range(5):
