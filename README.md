@@ -63,3 +63,47 @@ The engine provides:
 - `get_valid_actions()` - Returns all valid actions for current player
 - `apply_action()` - Applies an action and updates game state
 - `check_win_condition()` - Checks if game is over
+
+## Neural Network AI
+
+A Deep Q-Network (DQN) AI agent is included for learning to play the game.
+
+### Installation
+
+```bash
+pip install -r requirements.txt
+```
+
+### Training the AI
+
+Train the AI agent:
+
+```python
+from train_ai import train_agent
+
+train_agent(episodes=10000, save_path="dqn_model.pt")
+```
+
+Or run directly:
+
+```bash
+python train_ai.py
+```
+
+### Playing Against the AI
+
+After training, play against the AI:
+
+```bash
+python play_ai.py [model_path]
+```
+
+### AI Components
+
+- `state_encoder.py` - Converts game state to feature vectors
+- `action_encoder.py` - Maps actions to indices for neural network
+- `dqn_network.py` - Neural network architecture
+- `dqn_agent.py` - DQN agent with training logic
+- `replay_buffer.py` - Experience replay buffer
+- `train_ai.py` - Training script
+- `play_ai.py` - Interactive play script
