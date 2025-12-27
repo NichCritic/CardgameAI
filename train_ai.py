@@ -1,4 +1,5 @@
 import random
+import copy
 from typing import Optional
 from game_engine import initialize_game, check_win_condition
 from game import apply_action, get_valid_actions
@@ -54,7 +55,8 @@ def random_action(state):
 
 def play_game(agent: DQNAgent, opponent_agent: Optional[DQNAgent] = None, training: bool = True):
     state = initialize_game()
-    prev_states = {0: None, 1: None}
+    initial_state = copy.deepcopy(state)
+    prev_states = {0: initial_state, 1: initial_state}
     actions_taken = {0: [], 1: []}
     
     max_turns = 200
@@ -69,12 +71,15 @@ def play_game(agent: DQNAgent, opponent_agent: Optional[DQNAgent] = None, traini
         else:
             action = opponent_agent.select_action(state, player_idx, training=training)
         
+        state_before_action = copy.deepcopy(state)
         apply_action(state, action)
         check_win_condition(state)
         
         done = state.winner is not None
         
-        if training and prev_state is not None:
+        actions_taken[player_idx].append(action)
+        
+        if training and prev_state is not None and len(actions_taken[player_idx]) > 0:
             reward = calculate_reward(state, prev_state, player_idx, done)
             
             if player_idx == 0:
@@ -82,8 +87,8 @@ def play_game(agent: DQNAgent, opponent_agent: Optional[DQNAgent] = None, traini
             elif opponent_agent is not None:
                 opponent_agent.store_transition(prev_state, actions_taken[player_idx][-1], reward, state, done, player_idx)
         
-        prev_states[player_idx] = state
-        actions_taken[player_idx].append(action)
+        if not done:
+            prev_states[player_idx] = state_before_action
         
         if state.current_player != player_idx:
             turn_count += 1
@@ -122,7 +127,7 @@ def train_agent(
 ):
     action_encoder = ActionEncoder()
     print("Building action space...")
-    build_action_space(action_encoder)
+    build_action_space(action_encoder, num_games=50)
     print(f"Action space size: {action_encoder.get_max_actions()}")
     
     sample_state = initialize_game()
