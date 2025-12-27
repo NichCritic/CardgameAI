@@ -165,13 +165,17 @@ def check_win_condition(state: GameState) -> Optional[int]:
         return state.winner
     
     if len(state.player1.prizes) == 0:
+        state.winner = 0
         return 0
     if len(state.player2.prizes) == 0:
+        state.winner = 1
         return 1
     
     if state.player1.active_pokemon is None and len(state.player1.bench) == 0:
+        state.winner = 1
         return 1
     if state.player2.active_pokemon is None and len(state.player2.bench) == 0:
+        state.winner = 0
         return 0
     
     return None
