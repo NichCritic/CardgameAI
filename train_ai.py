@@ -138,12 +138,14 @@ def train_agent(
     
     wins = 0
     total_rewards = []
+    episode_wins = []
     
     for episode in range(episodes):
         winner, turns = play_game(agent, training=True)
         
-        if winner == 0:
-            wins += 1
+        episode_wins.append(1 if winner == 0 else 0)
+        if len(episode_wins) > 100:
+            episode_wins.pop(0)
         
         if episode % train_freq == 0 and len(agent.replay_buffer) >= batch_size:
             loss = agent.train_step(batch_size)
@@ -156,10 +158,17 @@ def train_agent(
         agent.update_epsilon()
         
         if episode % 100 == 0:
-            win_rate = wins / max(episode + 1, 1)
+            win_rate = sum(episode_wins) / len(episode_wins) if episode_wins else 0.0
             avg_loss = sum(total_rewards[-100:]) / len(total_rewards[-100:]) if total_rewards else 0.0
-            print(f"Episode {episode}, Win Rate: {win_rate:.2f}, Epsilon: {agent.epsilon:.3f}, Avg Loss: {avg_loss:.4f}")
-            wins = 0
+            loss_trend = ""
+            if len(total_rewards) >= 200:
+                early_loss = sum(total_rewards[:100]) / 100
+                recent_loss = sum(total_rewards[-100:]) / 100
+                if recent_loss < early_loss * 0.9:
+                    loss_trend = " (↓)"
+                elif recent_loss > early_loss * 1.1:
+                    loss_trend = " (↑)"
+            print(f"Episode {episode}, Win Rate: {win_rate:.2f}, Epsilon: {agent.epsilon:.3f}, Avg Loss: {avg_loss:.4f}{loss_trend}")
         
         if episode % save_freq == 0 and episode > 0:
             agent.save(save_path)
